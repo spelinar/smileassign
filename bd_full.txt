@@ -1,0 +1,91 @@
+﻿
+
+drop table booking;
+drop table user;
+drop table doctor;
+drop table specialty;
+
+create table user (
+id_user int(6) not Null Auto_increment,
+login varchar(255) not null,
+password varchar(255) not null,
+salt varchar(255) not null,
+constraint pk_user primary key(id_user)); 
+
+create table specialty(
+id_specialty int(6) not Null Auto_increment,
+specialty varchar(64) not Null,
+constraint PK_specialty primary key (id_specialty));
+
+create table doctor (
+id_doctor int(6) not Null Auto_increment,
+first_name varchar(64) not Null,
+second_name varchar(64)not Null,
+id_specialty int(6) not Null,
+foreign key (id_specialty) REFERENCES specialty(id_specialty),
+constraint pk_doctor primary key(id_doctor));
+
+create table booking (
+id_book int(6) not Null auto_increment,
+date TIMESTAMP,
+id_user int(6) not null,
+id_doctor  int(6) not Null,
+constraint PK_book primary key(id_book),
+foreign key (id_user) REFERENCES user(id_user),
+foreign key (id_doctor) REFERENCES doctor(id_doctor));
+
+
+insert into specialty(specialty) values('Consultation');
+insert into specialty(specialty) values('Tooth Pain');
+insert into specialty(specialty) values('Cleaning');
+insert into specialty(specialty) values('Brases');
+insert into specialty(specialty) values('Dental Implant');
+
+insert into doctor(first_name,second_name,id_specialty) values ("Mary", "Elizabeth",1);
+insert into doctor(first_name,second_name,id_specialty) values ("Li", "Xiao",1);
+insert into doctor(first_name,second_name,id_specialty) values ("Max", "Power",1);
+insert into doctor(first_name,second_name,id_specialty) values ("Igor", "Romanowicz",2);
+insert into doctor(first_name,second_name,id_specialty) values ("Ryś", "Kolcowski",2);
+insert into doctor(first_name,second_name,id_specialty) values ("Katarzyna", "Iosiwkowić",2);
+insert into doctor(first_name,second_name,id_specialty) values ("Andrzej", "Lew",3);
+insert into doctor(first_name,second_name,id_specialty) values ("Ira", "Zabyszna",3);
+insert into doctor(first_name,second_name,id_specialty) values ("Roman", "Spelina",3);
+insert into doctor(first_name,second_name,id_specialty) values ("Bogdan", "Dzwonczyk",3);
+insert into doctor(first_name,second_name,id_specialty) values ("Szymon", "Pierwszy",4);
+insert into doctor(first_name,second_name,id_specialty) values ("Krystian", "Mazowski",4);
+insert into doctor(first_name,second_name,id_specialty) values ("Konrad", "Bysiek",5);
+insert into doctor(first_name,second_name,id_specialty) values ("Aleksandr", "Bielski",5);
+insert into doctor(first_name,second_name,id_specialty) values ("Kamil", "Znanski",5);
+
+create view booking_info as 
+select id_user, date, first_name,second_name, specialty from booking as b   
+inner join doctor d on b.id_doctor=d.id_doctor
+inner join specialty s on s.id_specialty=d.id_specialty;
+
+
+
+create table user_audit(
+id_user_audit int(6) not Null auto_increment,
+login varchar(64)  not null,
+insert_date DATETIME DEFAULT NULL,
+action VARCHAR(50) DEFAULT NULL,
+CONSTRAINT PK_id_user_audit PRIMARY KEY (id_user_audit));
+
+
+CREATE TRIGGER before_user_create
+    before insert ON user
+    FOR EACH ROW 
+ INSERT INTO user_audit
+ SET action = 'insert',
+login=new.login,
+     insert_date = NOW();
+
+
+model  хранит все данные и оперирует над ними
+view   хранит внешний вид страницы
+controller связывает модель и представление
+
+
+тригер before_user_create вставляет данные в таблицу user_audit во время 
+создания нового пользователя, то есть когда происходит инсерт: 
+select * from user_audit;
